@@ -1,35 +1,33 @@
+/*
+    Authors: Aaron, Aaron, John, Jordan 
+    Student IDs: x19404024, x19435964, x19141301, x19765711 
+    Created On: 10/11/2021
+    Last Modified: 10/11/2021
+    Description: 
+    ------------------------
+    Create an application that monitors packets 
+    sent across 2 machines and intercepts the contents. 
+    Using cryptography, we can encrypt the packets sent across the network, 
+    making them unviewable outside peer-to-peer.
+ */
 
+//Import list of packages//
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-/**
- *  Authors: Aaron, Aaron, John, Jordan 
- *  Student IDs: x19404024, x19435964, x19141301, x19765711 
- *  Created On: 10/11/2021
- *  Last Modified: 10/11/2021
- *  Description: Create an application that monitors packets 
- *  sent across 2 machines and intercepts the contents. 
- *  Using cryptography, we can encrypt the packets sent across the network, 
- *  making them unviewable outside peer-to-peer.
- */
 public class PacketSniffer extends javax.swing.JFrame {
 
     /**
      * Creates new form PacketSnifferGUI
      */
     
-    // Variables
-    private String fileAddress; //
-    private String command;
-    private String ipAddress;
-    private boolean encryption;
+    // Private variables//
+    private String fileAddress;     //
+    private String command;         //
+    private String ipAddress;       //
+    private boolean encryption;     //
     
     public PacketSniffer() {
         initComponents();
