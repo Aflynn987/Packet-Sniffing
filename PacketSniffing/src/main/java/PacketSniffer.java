@@ -317,7 +317,7 @@ public class PacketSniffer extends javax.swing.JFrame {
 
             while((inP = in.readLine()) != null){
                 //System.out.println(inP);  -- DEBUG
-                JOptionPane.showMessageDialog(null, inP);
+                //JOptionPane.showMessageDialog(null, inP); -- DEBUG
                 ping += inP; 
             }
             in.close();
