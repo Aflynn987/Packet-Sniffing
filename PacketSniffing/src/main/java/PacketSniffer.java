@@ -15,6 +15,8 @@
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.net.*;
+import javax.swing.*;
 
 
 public class PacketSniffer extends javax.swing.JFrame {
@@ -76,7 +78,7 @@ public class PacketSniffer extends javax.swing.JFrame {
 
         commandLbl.setText("Command:");
 
-        addressLbl.setText("Ip4 Address:");
+        addressLbl.setText("IPv4 Address:");
 
         addressTf.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -299,6 +301,30 @@ public class PacketSniffer extends javax.swing.JFrame {
         both the command line input (e.g ping 194.024.214) and the output (e.g ping statistics)
         in their respective text area
         */
+        String ping = "";
+
+        //System.out.println("Please enter the host you wish to ping: ");   -- DEBUG
+        //hostInput = input.nextLine(); -- DEBUG
+        String hostInput = JOptionPane.showInputDialog(null, "Please enter the host you wish to ping: ");
+        String pingc = "ping -i 4 " + hostInput;
+
+        try{
+            Runtime run = Runtime.getRuntime();
+            Process proc = run.exec(pingc);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String inP;
+
+            while((inP = in.readLine()) != null){
+                //System.out.println(inP);  -- DEBUG
+                //JOptionPane.showMessageDialog(null, inP); -- DEBUG
+                ping += inP; 
+            }
+            in.close();
+        }
+        catch(IOException e){
+            System.out.println(e);
+        }
         
         
         
