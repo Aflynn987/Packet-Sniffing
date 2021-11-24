@@ -348,7 +348,6 @@ public class PacketSniffer extends javax.swing.JFrame {
             //Else the OS is unknown//
             else 
             {
-
                 JOptionPane.showMessageDialog(null, "No dectable OS", "Unknown OS", JOptionPane.WARNING_MESSAGE);
             }
         } 
