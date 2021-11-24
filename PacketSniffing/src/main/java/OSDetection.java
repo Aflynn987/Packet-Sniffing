@@ -6,8 +6,8 @@
     Description: 
     ------------------------
     Detects what OS the application is running on
+    and return boolean value
  */
-
 public class OSDetection 
 {
     //Private variables//
