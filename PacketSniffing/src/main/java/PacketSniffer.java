@@ -298,7 +298,9 @@ public class PacketSniffer extends javax.swing.JFrame {
     
       /*
         TRY:
-        Try find out which OS is running and open wireshark
+        Try find out which OS the end-user is running 
+        and then open wireshark based on the OS application 
+        folder directory
       */
         try
         {

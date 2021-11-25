@@ -6,7 +6,7 @@
     Description: 
     ------------------------
     Detects what OS the application is running on
-    and return boolean value
+    and return boolean value if true or false
  */
 public class OSDetection 
 {
