@@ -25,7 +25,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 
 public class PacketSniffer extends javax.swing.JFrame {
-
     /**
      * Creates new form PacketSnifferGUI
      */
@@ -59,8 +58,11 @@ public class PacketSniffer extends javax.swing.JFrame {
     }
     
     public PacketSniffer() {
+
        // pingBtn.isSelected();
         initComponents();
+        this.getRootPane().setDefaultButton(pingBtn);
+        rootPane.setDefaultButton(pingBtn);
     }
 
     /**
@@ -197,7 +199,8 @@ public class PacketSniffer extends javax.swing.JFrame {
             }
         });
 
-        exeEncryptionBtn.setText("Encryption");
+        
+        exeEncryptionBtn.setText("Encrypt");
         exeEncryptionBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exeEncryptionBtnActionPerformed(evt);
@@ -205,13 +208,15 @@ public class PacketSniffer extends javax.swing.JFrame {
         });
 
         encryptionKeyLbl.setText("Key");
+        
 
-        exeDecryptionBtn.setText("Dencryption");
+        exeDecryptionBtn.setText("Decrypt");
         exeDecryptionBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exeDecryptionBtnActionPerformed(evt);
             }
         });
+        
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -421,7 +426,7 @@ public class PacketSniffer extends javax.swing.JFrame {
      
      catch(UnknownHostException e)                // If not able to get the host
      {
-	addressTf.setText("Host ID not found!"); // Print "Host not found" in the address text field
+	    addressTf.setText("Host ID not found!"); // Print "Host not found" in the address text field
      }
         
     }//GEN-LAST:event_ipFinderBtnActionPerformed
@@ -497,6 +502,10 @@ public class PacketSniffer extends javax.swing.JFrame {
         } 
     }//GEN-LAST:event_wireSharkBtnActionPerformed
 
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {                                  
+        wireSharkBtn.setEnabled(false);     
+    } 
+
     private void pingBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pingBtnActionPerformed
         addressLbl.setVisible(true);
         addressTf.setVisible(true);
@@ -538,8 +547,8 @@ public class PacketSniffer extends javax.swing.JFrame {
         wireSharkBtn.setVisible(false);
         exeDecryptionBtn.setVisible(false);
         
-        CommandInputTa.setText(" ");
-        CommandOutputTa.setText(" ");
+        //CommandInputTa.setText(" ");
+        //CommandOutputTa.setText(" ");
     }//GEN-LAST:event_encryptionBtnActionPerformed
 
     private void decryptionBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decryptionBtnActionPerformed
@@ -610,7 +619,7 @@ public class PacketSniffer extends javax.swing.JFrame {
             
         }
         catch (Exception e){
-            CommandOutputTa.setText("Please enter the right key");
+            CommandOutputTa.setText("Please enter the correct key");
         }
         
     }//GEN-LAST:event_exeDecryptionBtnActionPerformed
@@ -629,6 +638,7 @@ public class PacketSniffer extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Hello! I noticed you're on macOS or Linux, \nwhen running the ping command, please make sure you run: \n'ping -c #' \nin the command box (replace # with the amount of times to ping a server), \nor else ping will never end and freeze the application.");
             }
 
+            
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
