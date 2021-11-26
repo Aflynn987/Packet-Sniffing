@@ -13,10 +13,15 @@
 
 //Import list of packages//
 import java.io.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.*;
 import javax.swing.*;
+import java.security.*;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
+
 
 
 public class PacketSniffer extends javax.swing.JFrame {
@@ -30,9 +35,31 @@ public class PacketSniffer extends javax.swing.JFrame {
     private String command;         //
     private String ipAddress;       //
     private boolean encryption;     //
-
+    
+    // private static variables for encryption//
+    private static SecretKeySpec secretKey;
+    private static byte[] key;
+    
+    // Set key encryption values
+    public static void setKey(String myKey){
+         MessageDigest sha = null;
+        try {
+            key = myKey.getBytes("UTF-8");
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16);
+            secretKey = new SecretKeySpec(key, "AES");
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
     
     public PacketSniffer() {
+       // pingBtn.isSelected();
         initComponents();
     }
 
@@ -51,8 +78,6 @@ public class PacketSniffer extends javax.swing.JFrame {
         commandLbl = new javax.swing.JLabel();
         addressLbl = new javax.swing.JLabel();
         addressTf = new javax.swing.JTextField();
-        wireSharkLbl = new javax.swing.JLabel();
-        wireSharkTf = new javax.swing.JTextField();
         nEncryptionBtn = new javax.swing.JRadioButton();
         yEncryptionBtn = new javax.swing.JRadioButton();
         encryptionLbl = new javax.swing.JLabel();
@@ -67,8 +92,15 @@ public class PacketSniffer extends javax.swing.JFrame {
         commandOutputLbl = new javax.swing.JLabel();
         ipFinderBtn = new javax.swing.JButton();
         ipFindLbl = new javax.swing.JLabel();
-        filePathBtn = new javax.swing.JButton();
+        wireSharkBtn = new javax.swing.JButton();
         filePathLbl = new javax.swing.JLabel();
+        pingBtn = new javax.swing.JButton();
+        encryptionBtn = new javax.swing.JButton();
+        decryptionBtn = new javax.swing.JButton();
+        exeEncryptionBtn = new javax.swing.JButton();
+        encryptionKeyLbl = new javax.swing.JLabel();
+        encryptionKeyTf = new javax.swing.JTextField();
+        exeDecryptionBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -88,14 +120,6 @@ public class PacketSniffer extends javax.swing.JFrame {
         addressTf.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addressTfActionPerformed(evt);
-            }
-        });
-
-        wireSharkLbl.setText("WireShark File Path:");
-
-        wireSharkTf.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                wireSharkTfActionPerformed(evt);
             }
         });
 
@@ -129,9 +153,9 @@ public class PacketSniffer extends javax.swing.JFrame {
         CommandOutputTa.setRows(5);
         jScrollPane2.setViewportView(CommandOutputTa);
 
-        commandInputLbl.setText("Command Line input");
+        commandInputLbl.setText(" Input");
 
-        commandOutputLbl.setText("Command line output");
+        commandOutputLbl.setText("output");
 
         ipFinderBtn.setText("IP");
         ipFinderBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -142,42 +166,83 @@ public class PacketSniffer extends javax.swing.JFrame {
 
         ipFindLbl.setText("Find your IP for you:");
 
-        filePathBtn.setText("File Path");
-        filePathBtn.addActionListener(new java.awt.event.ActionListener() {
+        wireSharkBtn.setText("WireShark");
+        wireSharkBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                filePathBtnActionPerformed(evt);
+                wireSharkBtnActionPerformed(evt);
             }
         });
 
-        filePathLbl.setText("Sample Wireshark File Path:");
+        filePathLbl.setText("Open WireShark");
+
+        pingBtn.setText("1");
+        pingBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pingBtnActionPerformed(evt);
+            }
+        });
+
+        encryptionBtn.setText("2");
+        encryptionBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                encryptionBtnActionPerformed(evt);
+            }
+        });
+
+        decryptionBtn.setText("3");
+        decryptionBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                decryptionBtnActionPerformed(evt);
+            }
+        });
+
+        exeEncryptionBtn.setText("Encryption");
+        exeEncryptionBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exeEncryptionBtnActionPerformed(evt);
+            }
+        });
+
+        encryptionKeyLbl.setText("Key");
+
+        exeDecryptionBtn.setText("Dencryption");
+        exeDecryptionBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exeDecryptionBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
+                .addComponent(jScrollPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addComponent(jSeparator1)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(83, 83, 83)
-                .addComponent(commandInputLbl)
+                .addGap(121, 121, 121)
+                .addComponent(commandInputLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(commandOutputLbl)
-                .addGap(105, 105, 105))
+                .addGap(149, 149, 149))
             .addGroup(layout.createSequentialGroup()
-                .addGap(151, 151, 151)
+                .addContainerGap()
+                .addComponent(pingBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(encryptionBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(decryptionBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(41, 41, 41)
                 .addComponent(headLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(wireSharkLbl)
-                            .addComponent(wireSharkTf, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
+                                .addGap(22, 22, 22)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(commandLbl)
                                     .addComponent(commandTf, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -186,36 +251,54 @@ public class PacketSniffer extends javax.swing.JFrame {
                                     .addComponent(addressLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(addressTf, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(42, 42, 42)
-                                .addComponent(encryptionLbl))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(202, 202, 202)
-                        .addComponent(yEncryptionBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(nEncryptionBtn)))
-                .addGap(78, 78, 78)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                                .addComponent(encryptionLbl))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(202, 202, 202)
+                                .addComponent(yEncryptionBtn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(nEncryptionBtn)))
+                        .addGap(78, 78, 78)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(eCommandLbl)
                             .addComponent(eCommandBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(exeEncryptionBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(exeDecryptionBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(encryptionKeyLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
+                        .addComponent(encryptionKeyTf, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(65, 65, 65)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(wireSharkBtn)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(filePathLbl)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(ipFinderBtn)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(ipFindLbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(30, 30, 30))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(filePathBtn)
-                            .addComponent(filePathLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(30, 30, 30))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(headLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(pingBtn)
+                            .addComponent(encryptionBtn)
+                            .addComponent(decryptionBtn))
+                        .addGap(34, 34, 34))
+                    .addComponent(headLbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(14, 14, 14)
@@ -238,14 +321,15 @@ public class PacketSniffer extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(eCommandBtn)
                             .addComponent(ipFinderBtn))))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(wireSharkLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(filePathLbl))
+                .addGap(28, 28, 28)
+                .addComponent(filePathLbl)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(wireSharkTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(filePathBtn))
+                    .addComponent(wireSharkBtn)
+                    .addComponent(exeEncryptionBtn)
+                    .addComponent(encryptionKeyLbl)
+                    .addComponent(encryptionKeyTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(exeDecryptionBtn))
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -254,7 +338,7 @@ public class PacketSniffer extends javax.swing.JFrame {
                     .addComponent(commandInputLbl))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE)
                     .addComponent(jScrollPane1))
                 .addGap(8, 8, 8))
         );
@@ -266,22 +350,8 @@ public class PacketSniffer extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_addressTfActionPerformed
 
-    private void wireSharkTfActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wireSharkTfActionPerformed
-        // TODO add your handling code here:
-        /*
-        The user types in the file address of wireshark.exe that is installed on his machine.
-        Once typed in, it will take the form of a string variable and be executed
-        */
-        
-        
-    }//GEN-LAST:event_wireSharkTfActionPerformed
-
     private void commandTfActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commandTfActionPerformed
-        // TODO add your handling code here:
-        
-        
-        
-        
+        // TODO add your handling code here:    
     }//GEN-LAST:event_commandTfActionPerformed
 
     private void nEncryptionBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nEncryptionBtnActionPerformed
@@ -292,7 +362,6 @@ public class PacketSniffer extends javax.swing.JFrame {
             
         // Add values to Variables
         ipAddress = addressTf.getText();       // Get the string from the address text field and store it in the ipAddress variable
-        fileAddress = wireSharkTf.getText();   // Get the string from the wireShark text field and store it in the fileAddress variable
         command = commandTf.getText();         // Get the string from the command text field and store it in the command variable
         
         
@@ -359,10 +428,190 @@ public class PacketSniffer extends javax.swing.JFrame {
         
     }//GEN-LAST:event_ipFinderBtnActionPerformed
 
-    private void filePathBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filePathBtnActionPerformed
+    private void wireSharkBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wireSharkBtnActionPerformed
         // TODO add your handling code here:
-        wireSharkTf.setText("c:/program files/Wireshark/Wireshark.exe"); // sample WireShark File Path placed in the text field
-    }//GEN-LAST:event_filePathBtnActionPerformed
+        
+        try
+        {
+            //IF Windows OS is running, try open up WireShark//
+            if (OSDetection.isWindowsOS()) 
+            {
+                /*
+                Try open Wireshark application
+                */
+                try 
+                {
+                    Process p = Runtime.getRuntime().exec("\"c:/program files/Wireshark/Wireshark.exe\"");
+                    p.waitFor();
+                } 
+                //Catch an IO exception and display message//
+                catch (IOException io) 
+                {
+                    JOptionPane.showMessageDialog(null, io, "IO Exception Error", JOptionPane.WARNING_MESSAGE);
+                }
+                //Catch an interrupted exception and display message//
+                catch (InterruptedException in) 
+                {
+                    JOptionPane.showMessageDialog(null, in, "Interrupted Exception Error", JOptionPane.WARNING_MESSAGE);
+                }
+
+            } 
+            //IF Linux OS or Mac OS OS is running, try open up WireShark//
+            else if (OSDetection.isLinuxOS() || OSDetection.isMacOS()) 
+            {
+                try 
+                {
+                    Process p = Runtime.getRuntime().exec("/Applications/Wireshark.app/");
+                    p.waitFor();
+                } 
+                //Catch an IO exception and display message//
+                catch (IOException io) 
+                {
+                    JOptionPane.showMessageDialog(null, io, "IO Exception Error", JOptionPane.WARNING_MESSAGE);
+                } 
+                //Catch an interrupted exception and display message//
+                catch (InterruptedException in) 
+                {
+                    JOptionPane.showMessageDialog(null, in, "Interrupted Exception Error", JOptionPane.WARNING_MESSAGE);
+                }
+
+            } 
+            //Else the OS is unknown//
+            else 
+            {
+                JOptionPane.showMessageDialog(null, "No dectable OS", "Unknown OS", JOptionPane.WARNING_MESSAGE);
+            }
+        } 
+        //Throw error message if all else fails//
+        catch (Exception e)
+        {
+            JOptionPane.showMessageDialog(null, e, e.toString(), JOptionPane.WARNING_MESSAGE);
+        } 
+    }//GEN-LAST:event_wireSharkBtnActionPerformed
+
+    private void pingBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pingBtnActionPerformed
+        // TODO add your handling code here:
+        addressLbl.setVisible(true);
+        addressTf.setVisible(true);
+        commandInputLbl.setVisible(true);
+        commandLbl.setVisible(true);
+        commandTf.setVisible(true);
+        eCommandLbl.setVisible(true);
+        eCommandBtn.setVisible(true);
+        exeEncryptionBtn.setVisible(false);
+        encryptionKeyLbl.setVisible(false);
+        encryptionKeyTf.setVisible(false);
+        encryptionLbl.setVisible(true);
+        yEncryptionBtn.setVisible(true);
+        nEncryptionBtn.setVisible(true);
+        ipFindLbl.setVisible(true);        
+        ipFinderBtn.setVisible(true);
+        filePathLbl.setVisible(true);
+        wireSharkBtn.setVisible(true);
+        exeDecryptionBtn.setVisible(false);        
+    }//GEN-LAST:event_pingBtnActionPerformed
+
+    private void encryptionBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encryptionBtnActionPerformed
+        // TODO add your handling code here:
+        addressLbl.setVisible(false);
+        addressTf.setVisible(false);
+        commandInputLbl.setVisible(true);
+        commandLbl.setVisible(false);
+        commandTf.setVisible(false);
+        eCommandLbl.setVisible(false);
+        eCommandBtn.setVisible(false);
+        exeEncryptionBtn.setVisible(true);
+        encryptionKeyLbl.setVisible(true);
+        encryptionKeyTf.setVisible(true);
+        encryptionLbl.setVisible(false);
+        yEncryptionBtn.setVisible(false);
+        nEncryptionBtn.setVisible(false);        
+        ipFindLbl.setVisible(false);
+        ipFinderBtn.setVisible(false);
+        filePathLbl.setVisible(false);
+        wireSharkBtn.setVisible(false);
+        exeDecryptionBtn.setVisible(false);
+        
+        CommandInputTa.setText(" ");
+        CommandOutputTa.setText(" ");
+    }//GEN-LAST:event_encryptionBtnActionPerformed
+
+    private void decryptionBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decryptionBtnActionPerformed
+        // TODO add your handling code here:
+        addressLbl.setVisible(false);
+        addressTf.setVisible(false);
+        commandInputLbl.setVisible(true);
+        commandLbl.setVisible(false);
+        commandTf.setVisible(false);
+        eCommandLbl.setVisible(false);
+        eCommandBtn.setVisible(false);
+        exeEncryptionBtn.setVisible(false);
+        encryptionKeyLbl.setVisible(true);
+        encryptionKeyTf.setVisible(true);
+        encryptionLbl.setVisible(false);
+        yEncryptionBtn.setVisible(false);
+        nEncryptionBtn.setVisible(false);        
+        ipFindLbl.setVisible(false);
+        ipFinderBtn.setVisible(false);
+        filePathLbl.setVisible(false);
+        wireSharkBtn.setVisible(false);
+        exeDecryptionBtn.setVisible(true);
+        
+        CommandInputTa.setText(" ");
+        CommandOutputTa.setText(" ");
+    }//GEN-LAST:event_decryptionBtnActionPerformed
+
+    private void exeEncryptionBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exeEncryptionBtnActionPerformed
+        // TODO add your handling code here:
+        /*
+         Encrypt the packet data with a key    
+        */
+        if(encryption=true){
+           try{
+               String strToEncrypt;
+               String secret;
+               
+               strToEncrypt=CommandInputTa.getText();
+               secret=encryptionKeyTf.getText();
+               setKey(secret);
+               Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+               cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+               CommandOutputTa.setText(Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8"))));
+               
+           } 
+           catch (Exception e){
+               CommandOutputTa.setText("Please enter the right key");
+           }
+        }
+        else{
+            
+        }
+        
+    }//GEN-LAST:event_exeEncryptionBtnActionPerformed
+
+    private void exeDecryptionBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exeDecryptionBtnActionPerformed
+        // TODO add your handling code here:
+        
+        /*
+         Dencrypt the packet data with a key    
+        */        
+        try{
+            String secret;
+            String strToDecrypt;
+            
+            secret=encryptionKeyTf.getText();
+            strToDecrypt=CommandInputTa.getText();
+            setKey(secret);
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            CommandOutputTa.setText(new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt))));
+            
+        }
+        catch (Exception e){
+            CommandOutputTa.setText("Please enter the right key");
+        }
+        
+    }//GEN-LAST:event_exeDecryptionBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -409,11 +658,16 @@ public class PacketSniffer extends javax.swing.JFrame {
     private javax.swing.JLabel commandLbl;
     private javax.swing.JLabel commandOutputLbl;
     private javax.swing.JTextField commandTf;
+    private javax.swing.JButton decryptionBtn;
     private javax.swing.JButton eCommandBtn;
     private javax.swing.JLabel eCommandLbl;
+    private javax.swing.JButton encryptionBtn;
     private javax.swing.ButtonGroup encryptionGrp;
+    private javax.swing.JLabel encryptionKeyLbl;
+    private javax.swing.JTextField encryptionKeyTf;
     private javax.swing.JLabel encryptionLbl;
-    private javax.swing.JButton filePathBtn;
+    private javax.swing.JButton exeDecryptionBtn;
+    private javax.swing.JButton exeEncryptionBtn;
     private javax.swing.JLabel filePathLbl;
     private javax.swing.JLabel headLbl;
     private javax.swing.JLabel ipFindLbl;
@@ -422,8 +676,8 @@ public class PacketSniffer extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JRadioButton nEncryptionBtn;
-    private javax.swing.JLabel wireSharkLbl;
-    private javax.swing.JTextField wireSharkTf;
+    private javax.swing.JButton pingBtn;
+    private javax.swing.JButton wireSharkBtn;
     private javax.swing.JRadioButton yEncryptionBtn;
     // End of variables declaration//GEN-END:variables
 
